@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+
+# Environment
+.env
+venv/
+
+# Backend runtime files
+backend/uploads/
+backend/outputs/
+backend/temp/
+
+# Logs
+*.log
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# OS files
+.DS_Store
+Thumbs.db
