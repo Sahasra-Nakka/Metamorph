@@ -1,38 +1,90 @@
-from pathlib import Path
+import uuid
 
-from fastapi import APIRouter, UploadFile, File
+from fastapi import (
+    APIRouter,
+    UploadFile,
+    File,
+    HTTPException
+)
 from fastapi.responses import FileResponse
 
 from app.services.file_service import save_upload_file
 from app.converters.image_pdf import jpg_to_pdf
 from app.converters.image_pdf import pdf_to_jpg
+from app.utils.file_validation import (
+    validate_extension,
+    validate_file_size
+)
 
-router = APIRouter(prefix="/image", tags=["Image Conversion"])
+router = APIRouter(
+    prefix="/image",
+    tags=["Image Conversion"]
+)
+
 
 @router.post("/jpg-to-pdf")
-async def convert_jpg_to_pdf(file: UploadFile = File(...)):
+async def convert_jpg_to_pdf(
+    file: UploadFile = File(...)
+):
 
-    input_path = await save_upload_file(file)
-
-    output_filename = Path(file.filename).stem + ".pdf"
-    output_path = f"outputs/{output_filename}"
-
-    jpg_to_pdf(input_path, output_path)
-
-    return FileResponse(
-        path=output_path,
-        filename=output_filename,
-        media_type="application/pdf"
+    validate_extension(
+        file.filename,
+        [".jpg", ".jpeg"]
     )
 
+    validate_file_size(file)
+
+    try:
+        input_path = await save_upload_file(file)
+
+        output_filename = f"{uuid.uuid4()}.pdf"
+        output_path = f"outputs/{output_filename}"
+
+        jpg_to_pdf(
+            input_path,
+            output_path
+        )
+
+        return FileResponse(
+            path=output_path,
+            filename=output_filename,
+            media_type="application/pdf"
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+
 @router.post("/pdf-to-jpg")
-async def convert_pdf_to_jpg(file: UploadFile = File(...)):
+async def convert_pdf_to_jpg(
+    file: UploadFile = File(...)
+):
 
-    input_path = await save_upload_file(file)
+    validate_extension(
+        file.filename,
+        [".pdf"]
+    )
 
-    output_files = pdf_to_jpg(input_path, "outputs")
+    validate_file_size(file)
 
-    return {
-        "message": "Conversion successful",
-        "files": output_files
-    }
+    try:
+        input_path = await save_upload_file(file)
+
+        output_files = pdf_to_jpg(
+            input_path,
+            "outputs"
+        )
+
+        return {
+            "message": "Conversion successful",
+            "files": output_files
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )

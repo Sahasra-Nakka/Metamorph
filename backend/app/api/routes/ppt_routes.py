@@ -1,10 +1,23 @@
 from pathlib import Path
 
-from fastapi import APIRouter, UploadFile, File
+from fastapi import (
+    APIRouter,
+    UploadFile,
+    File,
+    HTTPException
+)
 from fastapi.responses import FileResponse
 
-from app.services.file_service import save_upload_file
-from app.converters.ppt_pdf import ppt_to_pdf
+from app.services.file_service import (
+    save_upload_file
+)
+from app.converters.ppt_pdf import (
+    ppt_to_pdf
+)
+from app.utils.file_validation import (
+    validate_extension,
+    validate_file_size
+)
 
 router = APIRouter(
     prefix="/ppt",
@@ -12,22 +25,29 @@ router = APIRouter(
 )
 
 
-@router.post(
-    "/ppt-to-pdf",
-    summary="Convert PPTX to PDF",
-    description="Upload a PowerPoint file and convert it to PDF"
-)
-async def convert_ppt_to_pdf(file: UploadFile = File(...)):
+@router.post("/ppt-to-pdf")
+async def convert_ppt_to_pdf(
+    file: UploadFile = File(...)
+):
+
+    validate_extension(
+        file.filename,
+        [".ppt", ".pptx"]
+    )
+
+    validate_file_size(file)
 
     try:
-
         input_path = await save_upload_file(file)
 
-        ppt_to_pdf(input_path)
+        output_path = ppt_to_pdf(
+            input_path,
+            "outputs"
+        )
 
-        output_filename = Path(file.filename).stem + ".pdf"
-
-        output_path = f"outputs/{output_filename}"
+        output_filename = Path(
+            output_path
+        ).name
 
         return FileResponse(
             path=output_path,
@@ -36,7 +56,7 @@ async def convert_ppt_to_pdf(file: UploadFile = File(...)):
         )
 
     except Exception as e:
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
