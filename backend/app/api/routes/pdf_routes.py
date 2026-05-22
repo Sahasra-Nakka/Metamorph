@@ -95,17 +95,11 @@ async def merge_pdf_files(
         )
 
 
-@router.post(
-    "/split",
-    summary="Split PDF",
-    description="Extract selected pages from a PDF"
-)
+@router.post("/split")
 async def split_pdf_file(
     file: UploadFile = File(...),
-    start_page: int = 1,
-    end_page: int = 1
+    pages: str = ""
 ):
-
     validate_extension(
         file.filename,
         [".pdf"]
@@ -140,8 +134,7 @@ async def split_pdf_file(
 
         split_pdf(
             input_path,
-            start_page,
-            end_page,
+            pages,
             output_path
         )
 
@@ -156,7 +149,6 @@ async def split_pdf_file(
             status_code=500,
             detail=str(e)
         )
-
 
 @router.post("/page-count")
 async def get_pdf_page_count(

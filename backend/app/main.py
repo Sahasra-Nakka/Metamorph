@@ -11,8 +11,18 @@ from app.services.cleanup_service import (
     start_cleanup_service
 )
 
-app = FastAPI(title="Metamorph")
-start_cleanup_service()
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    start_cleanup_service()
+    yield
+
+app = FastAPI(
+    title="Metamorph",
+    lifespan=lifespan
+)
 
 app.add_middleware(
     CORSMiddleware,

@@ -7,7 +7,10 @@ import * as pdfjsLib from "pdfjs-dist";
 import API from "../services/api";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
-  `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+  new URL(
+    "pdfjs-dist/build/pdf.worker.min.mjs",
+    import.meta.url
+  ).toString();
 
 const fileAcceptMap = {
   WORD_TO_PDF: ".doc,.docx",
@@ -26,37 +29,44 @@ const conversionMap = {
     outputExtension: ".pdf",
     mimeType: "application/pdf"
   },
+
   PDF_TO_WORD: {
     endpoint: "/word/pdf-to-word",
     outputExtension: ".docx",
     mimeType:
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
   },
+
   PPT_TO_PDF: {
     endpoint: "/ppt/ppt-to-pdf",
     outputExtension: ".pdf",
     mimeType: "application/pdf"
   },
+
   EXCEL_TO_PDF: {
     endpoint: "/excel/excel-to-pdf",
     outputExtension: ".pdf",
     mimeType: "application/pdf"
   },
+
   JPG_TO_PDF: {
     endpoint: "/image/jpg-to-pdf",
     outputExtension: ".pdf",
     mimeType: "application/pdf"
   },
+
   PDF_TO_JPG: {
     endpoint: "/image/pdf-to-jpg",
     outputExtension: ".jpg",
     mimeType: "image/jpeg"
   },
+
   MERGE_PDF: {
     endpoint: "/pdf/merge",
     outputExtension: ".pdf",
     mimeType: "application/pdf"
   },
+
   SPLIT_PDF: {
     endpoint: "/pdf/split",
     outputExtension: ".pdf",
@@ -64,19 +74,28 @@ const conversionMap = {
   }
 };
 
-export default function UploadCard({ defaultConversion }) {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [loading, setLoading] = useState(false);
+export default function UploadCard({
+  defaultConversion
+}) {
+  const [selectedFile, setSelectedFile] =
+    useState(null);
 
-  const [pageCount, setPageCount] = useState(0);
-  const [thumbnails, setThumbnails] = useState([]);
+  const [selectedFiles, setSelectedFiles] =
+    useState([]);
 
-  const [startPage, setStartPage] = useState(1);
-  const [endPage, setEndPage] = useState(1);
+  const [selectedPages, setSelectedPages] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [thumbnails, setThumbnails] =
+    useState([]);
 
   const [conversionType, setConversionType] =
-    useState(defaultConversion || "WORD_TO_PDF");
+    useState(
+      defaultConversion || "WORD_TO_PDF"
+    );
 
   useEffect(() => {
     if (defaultConversion) {
@@ -87,153 +106,199 @@ export default function UploadCard({ defaultConversion }) {
   useEffect(() => {
     setSelectedFile(null);
     setSelectedFiles([]);
-    setPageCount(0);
+    setSelectedPages([]);
     setThumbnails([]);
-    setStartPage(1);
-    setEndPage(1);
   }, [conversionType]);
 
-  const generateThumbnails = async (file) => {
-    const arrayBuffer = await file.arrayBuffer();
+  const generateThumbnails =
+    async (file) => {
+      const buffer =
+        await file.arrayBuffer();
 
-    const pdf = await pdfjsLib.getDocument({
-      data: arrayBuffer
-    }).promise;
+      const pdf =
+        await pdfjsLib.getDocument({
+          data: buffer
+        }).promise;
 
-    const thumbs = [];
+      const thumbs = [];
 
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-
-      const viewport =
-        page.getViewport({ scale: 0.25 });
-
-      const canvas =
-        document.createElement("canvas");
-
-      const ctx =
-        canvas.getContext("2d");
-
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-
-      await page.render({
-        canvasContext: ctx,
-        viewport
-      }).promise;
-
-      thumbs.push(canvas.toDataURL());
-    }
-
-    setThumbnails(thumbs);
-    setPageCount(pdf.numPages);
-    setEndPage(pdf.numPages);
-  };
-
-  const handleFileChange = async (e) => {
-    const files = Array.from(e.target.files);
-
-    if (conversionType === "MERGE_PDF") {
-      setSelectedFiles(files);
-      return;
-    }
-
-    const file = files[0];
-    setSelectedFile(file);
-
-    if (
-      conversionType === "SPLIT_PDF" &&
-      file
-    ) {
-      await generateThumbnails(file);
-    }
-  };
-
-  const handleConvert = async () => {
-    if (!selectedFile && !selectedFiles.length) {
-      toast.error("Please select a file");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const formData =
-        new FormData();
-
-      if (
-        conversionType === "MERGE_PDF"
+      for (
+        let i = 1;
+        i <= pdf.numPages;
+        i++
       ) {
-        selectedFiles.forEach((f) =>
-          formData.append("files", f)
-        );
-      } else {
-        formData.append(
-          "file",
-          selectedFile
+        const page =
+          await pdf.getPage(i);
+
+        const viewport =
+          page.getViewport({
+            scale: 0.25
+          });
+
+        const canvas =
+          document.createElement(
+            "canvas"
+          );
+
+        const ctx =
+          canvas.getContext("2d");
+
+        canvas.width =
+          viewport.width;
+
+        canvas.height =
+          viewport.height;
+
+        await page.render({
+          canvasContext: ctx,
+          viewport
+        }).promise;
+
+        thumbs.push(
+          canvas.toDataURL()
         );
       }
 
-      const config = {
-        responseType: "blob"
-      };
+      setThumbnails(thumbs);
+    };
+
+  const handleFileChange =
+    async (e) => {
+      const files =
+        Array.from(
+          e.target.files
+        );
 
       if (
-        conversionType === "SPLIT_PDF"
+        conversionType ===
+        "MERGE_PDF"
       ) {
-        config.params = {
-          start_page: startPage,
-          end_page: endPage
+        setSelectedFiles(files);
+        return;
+      }
+
+      const file = files[0];
+
+      setSelectedFile(file);
+
+      if (
+        conversionType ===
+        "SPLIT_PDF"
+      ) {
+        await generateThumbnails(
+          file
+        );
+      }
+    };
+
+  const handleConvert =
+    async () => {
+      if (
+        !selectedFile &&
+        !selectedFiles.length
+      ) {
+        toast.error(
+          "Please select a file"
+        );
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        const formData =
+          new FormData();
+
+        if (
+          conversionType ===
+          "MERGE_PDF"
+        ) {
+          selectedFiles.forEach(
+            (f) =>
+              formData.append(
+                "files",
+                f
+              )
+          );
+        } else {
+          formData.append(
+            "file",
+            selectedFile
+          );
+        }
+
+        const config = {
+          responseType:
+            "blob"
         };
+
+        if (
+          conversionType ===
+            "SPLIT_PDF" &&
+          selectedPages.length
+        ) {
+          config.params = {
+            pages:
+              selectedPages.join(
+                ","
+              )
+          };
+        }
+
+        const response =
+          await API.post(
+            conversionMap[
+              conversionType
+            ].endpoint,
+            formData,
+            config
+          );
+
+        const blob =
+          new Blob(
+            [response.data],
+            {
+              type:
+                conversionMap[
+                  conversionType
+                ].mimeType
+            }
+          );
+
+        const url =
+          window.URL.createObjectURL(
+            blob
+          );
+
+        const a =
+          document.createElement(
+            "a"
+          );
+
+        a.href = url;
+        a.download =
+          "output";
+
+        document.body.appendChild(
+          a
+        );
+
+        a.click();
+
+        a.remove();
+
+        toast.success(
+          "Conversion successful 🦋"
+        );
+
+      } catch {
+        toast.error(
+          "Conversion failed"
+        );
+      } finally {
+        setLoading(false);
       }
-
-      const response =
-        await API.post(
-          conversionMap[
-            conversionType
-          ].endpoint,
-          formData,
-          config
-        );
-
-      const blob =
-        new Blob(
-          [response.data],
-          {
-            type:
-              conversionMap[
-                conversionType
-              ].mimeType
-          }
-        );
-
-      const url =
-        window.URL.createObjectURL(
-          blob
-        );
-
-      const a =
-        document.createElement("a");
-
-      a.href = url;
-      a.download = "output";
-
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      toast.success(
-        "Conversion successful 🦋"
-      );
-
-    } catch {
-      toast.error(
-        "Conversion failed"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
   return (
     <motion.div
@@ -282,6 +347,7 @@ export default function UploadCard({ defaultConversion }) {
 
         <label className="mt-8 px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 cursor-pointer">
           Choose File
+
           <input
             type="file"
             multiple={
@@ -302,15 +368,20 @@ export default function UploadCard({ defaultConversion }) {
 
         {selectedFile && (
           <div className="mt-4 text-gray-300">
-            {selectedFile.name}
+            {
+              selectedFile.name
+            }
           </div>
         )}
 
-        {selectedFiles.length > 0 && (
-          <div className="mt-4 w-full text-gray-300 text-sm">
+        {selectedFiles.length >
+          0 && (
+          <div className="mt-4 text-gray-300 text-sm">
             {selectedFiles.map(
               (f) => (
-                <div key={f.name}>
+                <div
+                  key={f.name}
+                >
                   {f.name}
                 </div>
               )
@@ -339,79 +410,81 @@ export default function UploadCard({ defaultConversion }) {
           <option value="SPLIT_PDF">SPLIT PDF</option>
         </select>
 
-        {conversionType === "SPLIT_PDF" &&
-          thumbnails.length > 0 && (
-          <>
-            <div className="grid grid-cols-4 gap-4 mt-6">
-              {thumbnails.map(
-                (img, i) => (
-                  <div
-                    key={i}
-                    onClick={() =>
-                      setEndPage(i + 1)
+        {conversionType ===
+          "SPLIT_PDF" &&
+          thumbnails.length >
+            0 && (
+          <div className="grid grid-cols-4 gap-4 mt-6">
+            {thumbnails.map(
+              (
+                img,
+                i
+              ) => (
+                <div
+                  key={i}
+                  onClick={() => {
+                    const p =
+                      i + 1;
+
+                    if (
+                      selectedPages.includes(
+                        p
+                      )
+                    ) {
+                      setSelectedPages(
+                        selectedPages.filter(
+                          (
+                            x
+                          ) =>
+                            x !==
+                            p
+                        )
+                      );
+                    } else {
+                      setSelectedPages(
+                        [
+                          ...selectedPages,
+                          p
+                        ]
+                      );
                     }
-                    className={`cursor-pointer border rounded ${
-                      i + 1 >=
-                        startPage &&
-                      i + 1 <=
-                        endPage
-                        ? "border-cyan-400"
-                        : "border-white/10"
-                    }`}
-                  >
-                    <img
-                      src={img}
-                      alt=""
-                    />
-                    <p className="text-center text-xs py-1">
-                      {i + 1}
-                    </p>
-                  </div>
-                )
-              )}
-            </div>
-
-            <div className="flex gap-4 mt-6 w-full">
-              <input
-                type="number"
-                value={startPage}
-                onChange={(e)=>
-                  setStartPage(
-                    Number(
-                      e.target.value
+                  }}
+                  className={`cursor-pointer border rounded ${
+                    selectedPages.includes(
+                      i + 1
                     )
-                  )
-                }
-                className="w-full p-3 rounded bg-[#111827]"
-              />
+                      ? "border-cyan-400"
+                      : "border-white/10"
+                  }`}
+                >
+                  <img
+                    src={img}
+                    alt=""
+                  />
 
-              <input
-                type="number"
-                value={endPage}
-                onChange={(e)=>
-                  setEndPage(
-                    Number(
-                      e.target.value
-                    )
-                  )
-                }
-                className="w-full p-3 rounded bg-[#111827]"
-              />
-            </div>
-          </>
+                  <p className="text-center text-xs py-1">
+                    {i + 1}
+                  </p>
+                </div>
+              )
+            )}
+          </div>
         )}
 
         <button
           onClick={
             handleConvert
           }
-          disabled={loading}
+          disabled={
+            loading
+          }
           className="mt-8 w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-500"
         >
           {loading
             ? "Metamorphosis... 🐛"
             : "Convert File 🦋"}
         </button>
+
       </div>
     </motion.div>
   );

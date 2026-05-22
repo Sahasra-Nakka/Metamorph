@@ -4,7 +4,7 @@ import threading
 
 UPLOADS = "uploads"
 OUTPUTS = "outputs"
-MAX_AGE = 120
+MAX_AGE = 300
 
 
 def cleanup_loop():
