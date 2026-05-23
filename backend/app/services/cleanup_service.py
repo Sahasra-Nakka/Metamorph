@@ -1,10 +1,14 @@
 import os
 import time
 import threading
+import shutil
+import logging
+
+logger = logging.getLogger(__name__)
 
 UPLOADS = "uploads"
 OUTPUTS = "outputs"
-MAX_AGE = 300
+MAX_AGE = 600
 
 
 def cleanup_loop():
@@ -18,26 +22,36 @@ def cleanup_loop():
             if not os.path.exists(folder):
                 continue
 
-            for filename in os.listdir(folder):
+            for entry in os.listdir(folder):
 
                 path = os.path.join(
                     folder,
-                    filename
+                    entry
                 )
-
-                if not os.path.isfile(path):
-                    continue
 
                 age = (
                     now -
                     os.path.getmtime(path)
                 )
 
-                if age > MAX_AGE:
-                    try:
+                if age < MAX_AGE:
+                    continue
+
+                try:
+                    if os.path.isfile(path):
                         os.remove(path)
-                    except Exception:
-                        pass
+                        logger.info(
+                            f"Deleted file: {path}"
+                        )
+                    elif os.path.isdir(path):
+                        shutil.rmtree(path)
+                        logger.info(
+                            f"Deleted directory: {path}"
+                        )
+                except Exception as e:
+                    logger.error(
+                        f"Failed to delete {path}: {e}"
+                    )
 
         time.sleep(30)
 

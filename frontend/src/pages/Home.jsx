@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Navbar from "../components/Navbar";
 import ConversionCard from "../components/ConversionCard";
 import UploadCard from "../components/UploadCard";
@@ -17,11 +17,20 @@ const tools = [
 
 export default function Home() {
   const [selectedTool, setSelectedTool] = useState("WORD_TO_PDF");
+  const uploadCardRef = useRef(null);
 
   const { scrollY } = useScroll();
 
   const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
   const heroY = useTransform(scrollY, [0, 300], [0, -100]);
+
+  const handleToolSelect = (key) => {
+    setSelectedTool(key);
+    uploadCardRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#0B0F19] text-white">
@@ -42,7 +51,7 @@ export default function Home() {
           </p>
         </motion.section>
 
-        <div className="relative z-10 -mt-20 px-6">
+        <div ref={uploadCardRef} className="relative z-10 -mt-20 px-6">
           <UploadCard defaultConversion={selectedTool} />
         </div>
 
@@ -51,7 +60,7 @@ export default function Home() {
             <ConversionCard
               key={tool.key}
               title={tool.label}
-              onClick={() => setSelectedTool(tool.key)}
+              onClick={() => handleToolSelect(tool.key)}
             />
           ))}
         </section>
