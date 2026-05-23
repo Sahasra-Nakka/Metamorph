@@ -31,9 +31,9 @@ export const conversionMap = {
   },
 
   PDF_TO_JPG: {
-    endpoint: "/image/pdf-to-jpg",
-    outputExtension: ".jpg",
-    mimeType: "image/jpeg"
+      endpoint: "/image/pdf-to-jpg",
+      outputExtension: ".jpg",
+      mimeType: "image/jpeg"
   },
 
   MERGE_PDF: {

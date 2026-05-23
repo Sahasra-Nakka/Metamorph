@@ -7,12 +7,10 @@ from app.api.routes.word_routes import router as word_router
 from app.api.routes.ppt_routes import router as ppt_router
 from app.api.routes.excel_routes import router as excel_router
 from app.api.routes.pdf_routes import router as pdf_router
-from app.services.cleanup_service import (
-    start_cleanup_service
-)
+from app.services.cleanup_service import start_cleanup_service
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -44,4 +42,3 @@ app.include_router(excel_router)
 @app.get("/")
 def home():
     return {"message": "Metamorph API Running"}
-

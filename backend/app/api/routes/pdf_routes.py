@@ -36,7 +36,6 @@ router = APIRouter(
 async def merge_pdf_files(
     files: list[UploadFile] = File(...)
 ):
-
     validate_multiple_extensions(
         files,
         [".pdf"]
@@ -49,25 +48,8 @@ async def merge_pdf_files(
         saved_files = []
 
         for file in files:
-            unique_name = (
-                f"{uuid.uuid4()}_{file.filename}"
-            )
-
-            file_path = (
-                f"uploads/{unique_name}"
-            )
-
-            with open(
-                file_path,
-                "wb"
-            ) as buffer:
-                buffer.write(
-                    await file.read()
-                )
-
-            saved_files.append(
-                file_path
-            )
+            file_path = await save_upload_file(file)
+            saved_files.append(file_path)
 
         output_filename = (
             f"merged_{uuid.uuid4()}.pdf"
@@ -107,22 +89,29 @@ async def split_pdf_file(
 
     validate_file_size(file)
 
+    if not pages or not pages.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="No pages specified"
+        )
+
     try:
-        unique_name = (
-            f"{uuid.uuid4()}_{file.filename}"
-        )
+        pages_list = [
+            p.strip()
+            for p in pages.split(",")
+            if p.strip()
+        ]
+        for p in pages_list:
+            if not p.isdigit() or int(p) < 1:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid page number: {p}. Must be a positive integer."
+                )
+    except HTTPException:
+        raise
 
-        input_path = (
-            f"uploads/{unique_name}"
-        )
-
-        with open(
-            input_path,
-            "wb"
-        ) as buffer:
-            buffer.write(
-                await file.read()
-            )
+    try:
+        input_path = await save_upload_file(file)
 
         output_filename = (
             f"split_{uuid.uuid4()}.pdf"
@@ -144,11 +133,15 @@ async def split_pdf_file(
             media_type="application/pdf"
         )
 
+    except HTTPException:
+        raise
+
     except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=str(e)
         )
+
 
 @router.post("/page-count")
 async def get_pdf_page_count(

@@ -68,7 +68,8 @@ export default function UploadCard({
       setSelectedFile(file);
 
       if (
-        conversionType === "SPLIT_PDF"
+        conversionType === "SPLIT_PDF" ||
+        conversionType === "PDF_TO_JPG"
       ) {
         await generateThumbnails(file);
       }
@@ -80,34 +81,30 @@ export default function UploadCard({
         !selectedFile &&
         !selectedFiles.length
       ) {
-        toast.error(
-          "Please select a file"
-        );
+        toast.error("Please select a file");
+        return;
+      }
+
+      if (
+        (conversionType === "PDF_TO_JPG" ||
+          conversionType === "SPLIT_PDF") &&
+        !selectedPages.length
+      ) {
+        toast.error("Please select at least one page");
         return;
       }
 
       try {
         setLoading(true);
 
-        const formData =
-          new FormData();
+        const formData = new FormData();
 
-        if (
-          conversionType ===
-          "MERGE_PDF"
-        ) {
+        if (conversionType === "MERGE_PDF") {
           selectedFiles.forEach(
-            (f) =>
-              formData.append(
-                "files",
-                f
-              )
+            (f) => formData.append("files", f)
           );
         } else {
-          formData.append(
-            "file",
-            selectedFile
-          );
+          formData.append("file", selectedFile);
         }
 
         const config = {
@@ -115,56 +112,67 @@ export default function UploadCard({
         };
 
         if (
-          conversionType ===
-            "SPLIT_PDF" &&
+          conversionType === "SPLIT_PDF" &&
           selectedPages.length
         ) {
           config.params = {
-            pages:
-              selectedPages.join(",")
+            pages: selectedPages.join(",")
           };
         }
 
-        const response =
-          await API.post(
-            conversionMap[
-              conversionType
-            ].endpoint,
-            formData,
-            config
-          );
+        if (conversionType === "PDF_TO_JPG") {
+          for (const page of selectedPages) {
+            const pageConfig = {
+              responseType: "blob",
+              params: { page }
+            };
 
-        const blob =
-          new Blob([
-            response.data
-          ]);
+            const response = await API.post(
+              conversionMap[conversionType].endpoint,
+              formData,
+              pageConfig
+            );
 
-        const url =
-          URL.createObjectURL(
-            blob
-          );
+            const blob = new Blob(
+              [response.data],
+              { type: conversionMap[conversionType].mimeType }
+            );
 
-        const a =
-          document.createElement(
-            "a"
-          );
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `page_${page}.jpg`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }
 
+          toast.success("Conversion successful 🦋");
+          setLoading(false);
+          return;
+        }
+
+        const response = await API.post(
+          conversionMap[conversionType].endpoint,
+          formData,
+          config
+        );
+
+        const blob = new Blob(
+          [response.data],
+          { type: conversionMap[conversionType].mimeType }
+        );
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
         a.href = url;
-        a.download = "output";
+        a.download = `output${conversionMap[conversionType].outputExtension}`;
         a.click();
+        URL.revokeObjectURL(url);
 
-        URL.revokeObjectURL(
-          url
-        );
-
-        toast.success(
-          "Conversion successful 🦋"
-        );
+        toast.success("Conversion successful 🦋");
 
       } catch {
-        toast.error(
-          "Conversion failed"
-        );
+        toast.error("Conversion failed");
       } finally {
         setLoading(false);
       }
@@ -172,14 +180,8 @@ export default function UploadCard({
 
   return (
     <motion.div
-      initial={{
-        opacity: 0,
-        y: 40
-      }}
-      animate={{
-        opacity: 1,
-        y: 0
-      }}
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
       className="
         max-w-3xl
         mx-auto
@@ -200,37 +202,25 @@ export default function UploadCard({
         selectedFile={selectedFile}
         selectedFiles={selectedFiles}
         onChange={handleFileChange}
-          />
-
-      <ConversionSelect
-        conversionType={
-          conversionType
-        }
-        setConversionType={
-          setConversionType
-        }
       />
 
-      {conversionType ===
-        "SPLIT_PDF" && (
+      <ConversionSelect
+        conversionType={conversionType}
+        setConversionType={setConversionType}
+      />
+
+      {(conversionType === "SPLIT_PDF" ||
+        conversionType === "PDF_TO_JPG") && (
         <SplitPdfSelector
-          thumbnails={
-            thumbnails
-          }
-          selectedPages={
-            selectedPages
-          }
-          setSelectedPages={
-            setSelectedPages
-          }
+          thumbnails={thumbnails}
+          selectedPages={selectedPages}
+          setSelectedPages={setSelectedPages}
         />
       )}
 
       <ConvertButton
         loading={loading}
-        onClick={
-          handleConvert
-        }
+        onClick={handleConvert}
       />
     </motion.div>
   );

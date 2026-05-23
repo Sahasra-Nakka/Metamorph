@@ -1,6 +1,9 @@
 from pathlib import Path
 import subprocess
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def ppt_to_pdf(input_path, output_dir):
@@ -23,10 +26,10 @@ def ppt_to_pdf(input_path, output_dir):
         text=True
     )
 
-    print(result.stdout)
-    print(result.stderr)
+    logger.info(result.stdout)
 
     if result.returncode != 0:
+        logger.error(result.stderr)
         raise Exception(
             "LibreOffice conversion failed"
         )

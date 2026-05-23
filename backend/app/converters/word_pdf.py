@@ -1,6 +1,10 @@
 import subprocess
 import os
+import logging
+
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 def convert_word_to_pdf(
@@ -26,10 +30,10 @@ def convert_word_to_pdf(
         text=True
     )
 
-    print(result.stdout)
-    print(result.stderr)
+    logger.info(result.stdout)
 
     if result.returncode != 0:
+        logger.error(result.stderr)
         raise Exception(
             "LibreOffice conversion failed"
         )
