@@ -5,18 +5,19 @@ import UploadCard from "../components/UploadCard";
 import { motion, useScroll, useTransform } from "framer-motion";
 
 const tools = [
-  { label: "JPG → PDF", key: "JPG_TO_PDF", desc: "Convert JPG images to PDF format" },
-  { label: "PDF → JPG", key: "PDF_TO_JPG", desc: "Extract pages from PDF as JPG images" },
-  { label: "PNG → PDF", key: "PNG_TO_PDF", desc: "Convert PNG images to PDF format" },
-  { label: "PDF → PNG", key: "PDF_TO_PNG", desc: "Extract pages from PDF as PNG images" },
-  { label: "PNG → JPG", key: "PNG_TO_JPG", desc: "Convert PNG images to JPG format" },
-  { label: "JPG → PNG", key: "JPG_TO_PNG", desc: "Convert JPG images to PNG format" },
-  { label: "WORD → PDF", key: "WORD_TO_PDF", desc: "Convert Word documents to PDF" },
-  { label: "PDF → WORD", key: "PDF_TO_WORD", desc: "Convert PDF files to editable Word docs" },
-  { label: "PPT → PDF", key: "PPT_TO_PDF", desc: "Convert PowerPoint slides to PDF" },
-  { label: "EXCEL → PDF", key: "EXCEL_TO_PDF", desc: "Convert Excel spreadsheets to PDF" },
-  { label: "MERGE PDF", key: "MERGE_PDF", desc: "Combine multiple PDFs into one file" },
-  { label: "SPLIT PDF", key: "SPLIT_PDF", desc: "Extract selected pages from a PDF" },
+  { label: "Merge PDF",            key: "MERGE_PDF",           desc: "Combine multiple PDFs into one file" },
+  { label: "Split PDF",            key: "SPLIT_PDF",           desc: "Extract selected pages from a PDF" },
+  { label: "PDF → Word",          key: "PDF_TO_WORD",         desc: "Convert PDF files to editable Word docs" },
+  { label: "PDF → JPG",           key: "PDF_TO_JPG",          desc: "Extract pages from PDF as JPG images" },
+  { label: "PDF → PNG",           key: "PDF_TO_PNG",          desc: "Extract pages from PDF as PNG images" },
+  { label: "Word → PDF",          key: "WORD_TO_PDF",         desc: "Convert Word documents to PDF" },
+  { label: "Excel → PDF",         key: "EXCEL_TO_PDF",        desc: "Convert Excel spreadsheets to PDF" },
+  { label: "PPT → PDF",           key: "PPT_TO_PDF",          desc: "Convert PowerPoint slides to PDF" },
+  { label: "JPG → PDF",           key: "JPG_TO_PDF",          desc: "Convert JPG images to PDF format" },
+  { label: "PNG → PDF",           key: "PNG_TO_PDF",          desc: "Convert PNG images to PDF format" },
+  { label: "PNG → JPG",           key: "PNG_TO_JPG",          desc: "Convert PNG images to JPG format" },
+  { label: "JPG → PNG",           key: "JPG_TO_PNG",          desc: "Convert JPG images to PNG format" },
+  { label: "Merge Images → PDF",  key: "MERGE_IMAGES_TO_PDF", desc: "Combine multiple images into one PDF" },
 ];
 
 export default function Home() {

@@ -1,14 +1,12 @@
 from fastapi import FastAPI
 import os
-
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes.image_routes import router as image_router
-from app.api.routes.word_routes import router as word_router
-from app.api.routes.ppt_routes import router as ppt_router
-from app.api.routes.excel_routes import router as excel_router
-from app.api.routes.pdf_routes import router as pdf_router
+from app.api.routes.image import router as image_router
+from app.api.routes.word import router as word_router
+from app.api.routes.ppt import router as ppt_router
+from app.api.routes.excel import router as excel_router
+from app.api.routes.pdf import router as pdf_router
 from app.services.cleanup_service import start_cleanup_service
-
 from contextlib import asynccontextmanager
 
 
@@ -17,16 +15,11 @@ async def lifespan(app: FastAPI):
     start_cleanup_service()
     yield
 
-app = FastAPI(
-    title="Metamorph",
-    lifespan=lifespan
-)
+app = FastAPI(title="Metamorph", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        os.getenv("FRONTEND_URL", "http://localhost:8000")
-    ],
+    allow_origins=[os.getenv("FRONTEND_URL", "http://localhost")],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

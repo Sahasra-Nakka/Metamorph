@@ -11,9 +11,7 @@ RUN apt-get update && apt-get install -y \
     libffi-dev \
     shared-mime-info \
     libmagic1 \
-    libreoffice-writer \
-    libreoffice-calc \
-    libreoffice-impress \
+    libreoffice \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

@@ -1,12 +1,11 @@
 venv/
 __pycache__/
-.env
-.git
+__pycache__
 .pytest_cache
 *.pyc
-
-uploads/
-output/
-.env
+.git
 .idea/
 .vscode/
+uploads/
+outputs/
+.env

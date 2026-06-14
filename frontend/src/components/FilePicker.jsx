@@ -13,8 +13,10 @@ const extensionToMime = {
   ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   ".jpg":  "image/jpeg",
   ".jpeg": "image/jpeg",
-  ".png":  "image/png",      // ← was missing, caused PNG uploads to be rejected
+  ".png":  "image/png",
 };
+
+const MULTI_FILE_TYPES = ["MERGE_PDF", "MERGE_IMAGES_TO_PDF"];
 
 export default function FilePicker({
   conversionType,
@@ -22,7 +24,7 @@ export default function FilePicker({
   selectedFiles,
   onChange
 }) {
-  const isMultiple = conversionType === "MERGE_PDF";
+  const isMultiple = MULTI_FILE_TYPES.includes(conversionType);
 
   const allowedExtensions = fileAcceptMap[conversionType]
     ?.split(",")
@@ -79,7 +81,9 @@ export default function FilePicker({
       <p className="text-gray-400 mt-3 text-center">
         {isDragActive
           ? "Drop it here..."
-          : "Drag & drop your file or click to choose"
+          : isMultiple
+            ? "Drag & drop files or click to choose multiple"
+            : "Drag & drop your file or click to choose"
         }
       </p>
 

@@ -26,6 +26,7 @@ export default function ConversionSelect({ conversionType, setConversionType }) 
         <option value="PNG_TO_PDF">PNG → PDF</option>
         <option value="PNG_TO_JPG">PNG → JPG</option>
         <option value="JPG_TO_PNG">JPG → PNG</option>
+        <option value="MERGE_IMAGES_TO_PDF">MERGE IMAGES → PDF</option>
       </optgroup>
     </select>
   );

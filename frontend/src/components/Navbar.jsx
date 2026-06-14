@@ -34,15 +34,18 @@ const categories = [
     ],
   },
   {
-    label: "Image",
-    icon: "🖼️",
-    tools: [
-      { label: "JPG → PDF", key: "JPG_TO_PDF", desc: "Wrap JPG in a PDF" },
-      { label: "PNG → PDF", key: "PNG_TO_PDF", desc: "Wrap PNG in a PDF" },
-      { label: "PNG → JPG", key: "PNG_TO_JPG", desc: "Convert PNG to JPG" },
-      { label: "JPG → PNG", key: "JPG_TO_PNG", desc: "Convert JPG to PNG" },
-    ],
-  },
+  label: "Image",
+  icon: "🖼️",
+  tools: [
+    { label: "JPG → PDF",           key: "JPG_TO_PDF",          desc: "Wrap JPG in a PDF" },
+    { label: "PNG → PDF",           key: "PNG_TO_PDF",          desc: "Wrap PNG in a PDF" },
+    { label: "PDF → JPG",           key: "PDF_TO_JPG",          desc: "Export pages as JPG" },
+    { label: "PDF → PNG",           key: "PDF_TO_PNG",          desc: "Export pages as PNG" },
+    { label: "PNG → JPG",           key: "PNG_TO_JPG",          desc: "Convert PNG to JPG" },
+    { label: "JPG → PNG",           key: "JPG_TO_PNG",          desc: "Convert JPG to PNG" },
+    { label: "Merge Images → PDF",  key: "MERGE_IMAGES_TO_PDF", desc: "Combine images into one PDF" },
+  ],
+},
 ];
 
 export default function Navbar({
