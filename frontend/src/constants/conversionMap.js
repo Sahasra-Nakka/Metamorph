@@ -4,47 +4,61 @@ export const conversionMap = {
     outputExtension: ".pdf",
     mimeType: "application/pdf"
   },
-
   PDF_TO_WORD: {
     endpoint: "/word/pdf-to-word",
     outputExtension: ".docx",
-    mimeType:
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
   },
-
   PPT_TO_PDF: {
     endpoint: "/ppt/ppt-to-pdf",
     outputExtension: ".pdf",
     mimeType: "application/pdf"
   },
-
   EXCEL_TO_PDF: {
     endpoint: "/excel/excel-to-pdf",
     outputExtension: ".pdf",
     mimeType: "application/pdf"
   },
-
   JPG_TO_PDF: {
     endpoint: "/image/jpg-to-pdf",
     outputExtension: ".pdf",
     mimeType: "application/pdf"
   },
-
   PDF_TO_JPG: {
-      endpoint: "/image/pdf-to-jpg",
-      outputExtension: ".jpg",
-      mimeType: "image/jpeg"
+    endpoint: "/image/pdf-to-jpg",
+    outputExtension: ".jpg",
+    mimeType: "image/jpeg"
   },
-
   MERGE_PDF: {
     endpoint: "/pdf/merge",
     outputExtension: ".pdf",
     mimeType: "application/pdf"
   },
-
   SPLIT_PDF: {
     endpoint: "/pdf/split",
     outputExtension: ".pdf",
     mimeType: "application/pdf"
-  }
+  },
+
+  // ── new ──
+  PNG_TO_PDF: {
+    endpoint: "/image/png-to-pdf",
+    outputExtension: ".pdf",
+    mimeType: "application/pdf"
+  },
+  PDF_TO_PNG: {
+    endpoint: "/image/pdf-to-png",
+    outputExtension: ".png",
+    mimeType: "image/png"
+  },
+  PNG_TO_JPG: {
+    endpoint: "/image/png-to-jpg",
+    outputExtension: ".jpg",
+    mimeType: "image/jpeg"
+  },
+  JPG_TO_PNG: {
+    endpoint: "/image/jpg-to-png",
+    outputExtension: ".png",
+    mimeType: "image/png"
+  },
 };

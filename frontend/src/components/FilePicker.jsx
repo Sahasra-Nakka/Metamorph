@@ -4,15 +4,16 @@ import { Upload } from "lucide-react";
 import { fileAcceptMap } from "../constants/FileAcceptMap";
 
 const extensionToMime = {
-  ".pdf": "application/pdf",
-  ".doc": "application/msword",
+  ".pdf":  "application/pdf",
+  ".doc":  "application/msword",
   ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  ".ppt": "application/vnd.ms-powerpoint",
+  ".ppt":  "application/vnd.ms-powerpoint",
   ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  ".xls": "application/vnd.ms-excel",
+  ".xls":  "application/vnd.ms-excel",
   ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  ".jpg": "image/jpeg",
+  ".jpg":  "image/jpeg",
   ".jpeg": "image/jpeg",
+  ".png":  "image/png",      // ← was missing, caused PNG uploads to be rejected
 };
 
 export default function FilePicker({
@@ -65,20 +66,15 @@ export default function FilePicker({
       <input {...getInputProps()} />
 
       <div
-  className="w-24 h-24 rounded-full flex items-center justify-center mb-6"
-  style={{
-    background: "linear-gradient(135deg, rgba(244,114,182,0.15), rgba(251,146,60,0.15))"
-  }}
->
-  <Upload
-    size={40}
-    className="text-pink-400"
-  />
-</div>
+        className="w-24 h-24 rounded-full flex items-center justify-center mb-6"
+        style={{
+          background: "linear-gradient(135deg, rgba(244,114,182,0.15), rgba(251,146,60,0.15))"
+        }}
+      >
+        <Upload size={40} className="text-pink-400" />
+      </div>
 
-      <h2 className="text-3xl font-bold text-white">
-        Upload File
-      </h2>
+      <h2 className="text-3xl font-bold text-white">Upload File</h2>
 
       <p className="text-gray-400 mt-3 text-center">
         {isDragActive

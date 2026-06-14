@@ -7,12 +7,16 @@ import { motion, useScroll, useTransform } from "framer-motion";
 const tools = [
   { label: "JPG → PDF", key: "JPG_TO_PDF", desc: "Convert JPG images to PDF format" },
   { label: "PDF → JPG", key: "PDF_TO_JPG", desc: "Extract pages from PDF as JPG images" },
+  { label: "PNG → PDF", key: "PNG_TO_PDF", desc: "Convert PNG images to PDF format" },
+  { label: "PDF → PNG", key: "PDF_TO_PNG", desc: "Extract pages from PDF as PNG images" },
+  { label: "PNG → JPG", key: "PNG_TO_JPG", desc: "Convert PNG images to JPG format" },
+  { label: "JPG → PNG", key: "JPG_TO_PNG", desc: "Convert JPG images to PNG format" },
   { label: "WORD → PDF", key: "WORD_TO_PDF", desc: "Convert Word documents to PDF" },
   { label: "PDF → WORD", key: "PDF_TO_WORD", desc: "Convert PDF files to editable Word docs" },
   { label: "PPT → PDF", key: "PPT_TO_PDF", desc: "Convert PowerPoint slides to PDF" },
   { label: "EXCEL → PDF", key: "EXCEL_TO_PDF", desc: "Convert Excel spreadsheets to PDF" },
   { label: "MERGE PDF", key: "MERGE_PDF", desc: "Combine multiple PDFs into one file" },
-  { label: "SPLIT PDF", key: "SPLIT_PDF", desc: "Extract selected pages from a PDF" }
+  { label: "SPLIT PDF", key: "SPLIT_PDF", desc: "Extract selected pages from a PDF" },
 ];
 
 export default function Home() {
@@ -34,11 +38,11 @@ export default function Home() {
   };
 
   const scrollToTools = () => {
-  toolsRef.current?.scrollIntoView({
-    behavior: "smooth",
-    block: "center"
-  });
-};
+    toolsRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#0B0F19] text-white">
@@ -131,7 +135,7 @@ export default function Home() {
           <p className="text-gray-400 text-lg leading-relaxed">
             Metamorph is a privacy-first document transformation platform.
             Your files are processed locally on the server and automatically
-            deleted after 10 minutes — never stored, never shared.
+            deleted after 10 minutes.
             Convert between PDF, Word, Excel, PowerPoint, and image formats
             with ease.
           </p>

@@ -12,37 +12,20 @@ import SplitPdfSelector from "./SplitPdfSelector";
 import ConvertButton from "./ConvertButton";
 import usePdfThumbnails from "../hooks/usePdfThumbnails";
 
+// conversions that need a page picker
+const PAGE_PICKER_TYPES = ["SPLIT_PDF", "PDF_TO_JPG", "PDF_TO_PNG"];
 
-export default function UploadCard({
-  defaultConversion
-}) {
-  const [selectedFile, setSelectedFile] =
-    useState(null);
+export default function UploadCard({ defaultConversion }) {
+  const [selectedFile,  setSelectedFile]  = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedPages, setSelectedPages] = useState([]);
+  const [loading,       setLoading]       = useState(false);
+  const [conversionType, setConversionType] = useState(defaultConversion || "WORD_TO_PDF");
 
-  const [selectedFiles, setSelectedFiles] =
-    useState([]);
-
-  const [selectedPages, setSelectedPages] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [conversionType, setConversionType] =
-    useState(
-      defaultConversion || "WORD_TO_PDF"
-    );
-
-  const {
-    thumbnails,
-    setThumbnails,
-    generateThumbnails
-  } = usePdfThumbnails();
+  const { thumbnails, setThumbnails, generateThumbnails } = usePdfThumbnails();
 
   useEffect(() => {
-    if (defaultConversion) {
-      setConversionType(defaultConversion);
-    }
+    if (defaultConversion) setConversionType(defaultConversion);
   }, [defaultConversion]);
 
   useEffect(() => {
@@ -52,146 +35,108 @@ export default function UploadCard({
     setThumbnails([]);
   }, [conversionType]);
 
-  const handleFileChange =
-    async (e) => {
-      const files =
-        Array.from(e.target.files);
+  const handleFileChange = async (e) => {
+    const files = Array.from(e.target.files);
 
-      if (
-        conversionType === "MERGE_PDF"
-      ) {
-        setSelectedFiles(files);
-        return;
+    if (conversionType === "MERGE_PDF") {
+      setSelectedFiles(files);
+      return;
+    }
+
+    const file = files[0];
+    setSelectedFile(file);
+
+    if (PAGE_PICKER_TYPES.includes(conversionType)) {
+      await generateThumbnails(file);
+    }
+  };
+
+  const handleConvert = async () => {
+    if (!selectedFile && !selectedFiles.length) {
+      toast.error("Please select a file");
+      return;
+    }
+
+    if (PAGE_PICKER_TYPES.includes(conversionType) && conversionType !== "SPLIT_PDF" && !selectedPages.length) {
+      toast.error("Please select at least one page");
+      return;
+    }
+
+    if (conversionType === "SPLIT_PDF" && !selectedPages.length) {
+      toast.error("Please select at least one page");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const formData = new FormData();
+
+      if (conversionType === "MERGE_PDF") {
+        selectedFiles.forEach((f) => formData.append("files", f));
+      } else {
+        formData.append("file", selectedFile);
       }
 
-      const file = files[0];
-      setSelectedFile(file);
+      const config = { responseType: "blob" };
 
-      if (
-        conversionType === "SPLIT_PDF" ||
-        conversionType === "PDF_TO_JPG"
-      ) {
-        await generateThumbnails(file);
-      }
-    };
-
-  const handleConvert =
-    async () => {
-      if (
-        !selectedFile &&
-        !selectedFiles.length
-      ) {
-        toast.error("Please select a file");
-        return;
+      if (conversionType === "SPLIT_PDF" && selectedPages.length) {
+        config.params = { pages: selectedPages.join(",") };
       }
 
-      if (
-        (conversionType === "PDF_TO_JPG" ||
-          conversionType === "SPLIT_PDF") &&
-        !selectedPages.length
-      ) {
-        toast.error("Please select at least one page");
-        return;
-      }
-
-      try {
-        setLoading(true);
-
-        const formData = new FormData();
-
-        if (conversionType === "MERGE_PDF") {
-          selectedFiles.forEach(
-            (f) => formData.append("files", f)
+      // multi-page image export (PDF → JPG or PDF → PNG)
+      if (conversionType === "PDF_TO_JPG" || conversionType === "PDF_TO_PNG") {
+        const ext = conversionType === "PDF_TO_JPG" ? "jpg" : "png";
+        for (const page of selectedPages) {
+          const response = await API.post(
+            conversionMap[conversionType].endpoint,
+            formData,
+            { responseType: "blob", params: { page } }
           );
-        } else {
-          formData.append("file", selectedFile);
+          const blob = new Blob([response.data], { type: conversionMap[conversionType].mimeType });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `page_${page}.${ext}`;
+          a.click();
+          URL.revokeObjectURL(url);
         }
-
-        const config = {
-          responseType: "blob"
-        };
-
-        if (
-          conversionType === "SPLIT_PDF" &&
-          selectedPages.length
-        ) {
-          config.params = {
-            pages: selectedPages.join(",")
-          };
-        }
-
-        if (conversionType === "PDF_TO_JPG") {
-          for (const page of selectedPages) {
-            const pageConfig = {
-              responseType: "blob",
-              params: { page }
-            };
-
-            const response = await API.post(
-              conversionMap[conversionType].endpoint,
-              formData,
-              pageConfig
-            );
-
-            const blob = new Blob(
-              [response.data],
-              { type: conversionMap[conversionType].mimeType }
-            );
-
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `page_${page}.jpg`;
-            a.click();
-            URL.revokeObjectURL(url);
-          }
-
-          toast.success("Conversion successful 🦋");
-          setLoading(false);
-          return;
-        }
-
-        const response = await API.post(
-          conversionMap[conversionType].endpoint,
-          formData,
-          config
-        );
-
-        const blob = new Blob(
-          [response.data],
-          { type: conversionMap[conversionType].mimeType }
-        );
-
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `output${conversionMap[conversionType].outputExtension}`;
-        a.click();
-        URL.revokeObjectURL(url);
-
         toast.success("Conversion successful 🦋");
-
-      } catch {
-        toast.error("Conversion failed");
-      } finally {
         setLoading(false);
+        return;
       }
-    };
+
+      const response = await API.post(
+        conversionMap[conversionType].endpoint,
+        formData,
+        config
+      );
+
+      const blob = new Blob([response.data], { type: conversionMap[conversionType].mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `output${conversionMap[conversionType].outputExtension}`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      toast.success("Conversion successful 🦋");
+
+    } catch {
+      toast.error("Conversion failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       className="
-        max-w-3xl
-        mx-auto
-        mt-20
-        bg-white/5
-        border
-        border-white/10
-        backdrop-blur-xl
-        rounded-3xl
-        p-10
+        max-w-3xl mx-auto mt-20
+        bg-white/5 border border-white/10
+        backdrop-blur-xl rounded-3xl p-10
       "
     >
       <Toaster position="top-right" />
@@ -209,8 +154,7 @@ export default function UploadCard({
         setConversionType={setConversionType}
       />
 
-      {(conversionType === "SPLIT_PDF" ||
-        conversionType === "PDF_TO_JPG") && (
+      {PAGE_PICKER_TYPES.includes(conversionType) && (
         <SplitPdfSelector
           thumbnails={thumbnails}
           selectedPages={selectedPages}
@@ -218,10 +162,7 @@ export default function UploadCard({
         />
       )}
 
-      <ConvertButton
-        loading={loading}
-        onClick={handleConvert}
-      />
+      <ConvertButton loading={loading} onClick={handleConvert} />
     </motion.div>
   );
 }
