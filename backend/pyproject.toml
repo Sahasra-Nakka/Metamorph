@@ -13,14 +13,17 @@ exclude = [
 select = [
     "E",   # pycodestyle errors
     "W",   # pycodestyle warnings
-    "F",   # pyflakes (unused imports, undefined names, etc.)
-    "I",   # isort (import sorting)
-    "B",   # flake8-bugbear (common bug patterns)
-    "UP",  # pyupgrade (modern Python syntax)
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
     "SIM", # flake8-simplify
 ]
+
 ignore = [
-    "E501", # line too long — formatter handles wrapping, avoid noisy duplicate warnings
+    "E501", # line too long
+    "B008", # FastAPI File(...), Query(...), Body(...)
+    "B904", # raise ... from err
 ]
 
 [tool.ruff.lint.isort]
