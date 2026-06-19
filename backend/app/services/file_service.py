@@ -15,10 +15,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 async def save_upload_file(upload_file):
-
-    safe_filename = Path(
-        upload_file.filename
-    ).name
+    safe_filename = Path(upload_file.filename).name
 
     if not safe_filename:
         raise HTTPException(
@@ -26,18 +23,20 @@ async def save_upload_file(upload_file):
             detail="Invalid filename"
         )
 
-    unique_name = (
-        f"{uuid.uuid4()}_"
-        f"{safe_filename}"
-    )
-
-    file_path = (
-        Path(UPLOAD_DIR) / unique_name
-    )
+    # Use uuid-only name to eliminate any path traversal risk
+    unique_name = f"{uuid.uuid4()}{Path(safe_filename).suffix}"
+    file_path = Path(UPLOAD_DIR) / unique_name
 
     with open(file_path, "wb") as buffer:
-        buffer.write(
-            await upload_file.read()
-        )
+        buffer.write(await upload_file.read())
 
     return str(file_path)
+
+
+def delete_file(path: str):
+    """Silently delete a file if it exists. Call in finally blocks after conversion."""
+    try:
+        if path and os.path.exists(path):
+            os.remove(path)
+    except Exception:
+        pass

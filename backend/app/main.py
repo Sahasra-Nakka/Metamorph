@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 import os
+from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes.image import router as image_router
 from app.api.routes.word import router as word_router
@@ -8,6 +9,8 @@ from app.api.routes.excel import router as excel_router
 from app.api.routes.pdf import router as pdf_router
 from app.services.cleanup_service import start_cleanup_service
 from contextlib import asynccontextmanager
+
+load_dotenv()
 
 
 @asynccontextmanager
@@ -19,7 +22,7 @@ app = FastAPI(title="Metamorph", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.getenv("FRONTEND_URL", "http://localhost")],
+    allow_origins=[os.getenv("FRONTEND_URL", "http://localhost:5173")],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -35,3 +38,8 @@ app.include_router(excel_router)
 @app.get("/")
 def home():
     return {"message": "Metamorph API Running"}
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
