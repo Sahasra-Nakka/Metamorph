@@ -1,6 +1,7 @@
-from PIL import Image
-import fitz
 import uuid
+
+import fitz
+from PIL import Image
 
 
 def jpg_to_pdf(input_path, output_path):
@@ -50,14 +51,13 @@ def jpg_to_png(input_path, output_path):
     image = Image.open(input_path)
     image.save(output_path, "PNG")
 
+
 def merge_images_to_pdf(input_paths, output_path):
     """Merge multiple images (JPG/PNG) into a single PDF, one image per page."""
     images = []
     for path in input_paths:
         img = Image.open(path)
-        if img.mode == "RGBA":
-            img = img.convert("RGB")
-        elif img.mode not in ("RGB", "L"):
+        if img.mode == "RGBA" or img.mode not in ("RGB", "L"):
             img = img.convert("RGB")
         images.append(img)
 

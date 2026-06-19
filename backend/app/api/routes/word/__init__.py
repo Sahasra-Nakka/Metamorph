@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from .word_to_pdf import router as word_to_pdf_router
 from .pdf_to_word import router as pdf_to_word_router
+from .word_to_pdf import router as word_to_pdf_router
 
 router = APIRouter(prefix="/word", tags=["Word Conversion"])
 

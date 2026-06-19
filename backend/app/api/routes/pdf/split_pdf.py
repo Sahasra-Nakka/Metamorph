@@ -1,13 +1,14 @@
 import uuid
 
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
-from app.services.file_service import save_upload_file
 from app.converters.pdf_tools import split_pdf
+from app.services.file_service import save_upload_file
 from app.utils.file_validation import validate_extension, validate_file_size
 
 router = APIRouter()
+
 
 @router.post("/split")
 async def split_pdf_file(file: UploadFile = File(...), pages: str = ""):
@@ -27,7 +28,9 @@ async def split_pdf_file(file: UploadFile = File(...), pages: str = ""):
         output_filename = f"split_{uuid.uuid4()}.pdf"
         output_path = f"outputs/{output_filename}"
         split_pdf(input_path, pages, output_path)
-        return FileResponse(path=output_path, filename=output_filename, media_type="application/pdf")
+        return FileResponse(
+            path=output_path, filename=output_filename, media_type="application/pdf"
+        )
     except HTTPException:
         raise
     except Exception as e:

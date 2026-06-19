@@ -1,10 +1,8 @@
 import os
 import uuid
-
 from pathlib import Path
 
 from fastapi import HTTPException
-
 
 UPLOAD_DIR = "uploads"
 OUTPUT_DIR = "outputs"
@@ -18,10 +16,7 @@ async def save_upload_file(upload_file):
     safe_filename = Path(upload_file.filename).name
 
     if not safe_filename:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid filename"
-        )
+        raise HTTPException(status_code=400, detail="Invalid filename")
 
     # Use uuid-only name to eliminate any path traversal risk
     unique_name = f"{uuid.uuid4()}{Path(safe_filename).suffix}"

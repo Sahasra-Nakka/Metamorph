@@ -1,13 +1,14 @@
 import uuid
 
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
-from app.services.file_service import save_upload_file, delete_file
 from app.converters.pdf_word import pdf_to_docx
+from app.services.file_service import delete_file, save_upload_file
 from app.utils.file_validation import validate_extension, validate_file_size
 
 router = APIRouter()
+
 
 @router.post("/pdf-to-word")
 async def convert_pdf_to_word(file: UploadFile = File(...)):
@@ -22,7 +23,7 @@ async def convert_pdf_to_word(file: UploadFile = File(...)):
         return FileResponse(
             path=output_path,
             filename=output_filename,
-            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

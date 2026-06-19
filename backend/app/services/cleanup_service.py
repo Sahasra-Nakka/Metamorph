@@ -1,8 +1,8 @@
-import os
-import time
-import threading
-import shutil
 import logging
+import os
+import shutil
+import threading
+import time
 
 logger = logging.getLogger(__name__)
 

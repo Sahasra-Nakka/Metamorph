@@ -1,14 +1,16 @@
-from fastapi import FastAPI
 import os
-from dotenv import load_dotenv
-from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes.image import router as image_router
-from app.api.routes.word import router as word_router
-from app.api.routes.ppt import router as ppt_router
-from app.api.routes.excel import router as excel_router
-from app.api.routes.pdf import router as pdf_router
-from app.services.cleanup_service import start_cleanup_service
 from contextlib import asynccontextmanager
+
+from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.api.routes.excel import router as excel_router
+from app.api.routes.image import router as image_router
+from app.api.routes.pdf import router as pdf_router
+from app.api.routes.ppt import router as ppt_router
+from app.api.routes.word import router as word_router
+from app.services.cleanup_service import start_cleanup_service
 
 load_dotenv()
 
@@ -17,6 +19,7 @@ load_dotenv()
 async def lifespan(app: FastAPI):
     start_cleanup_service()
     yield
+
 
 app = FastAPI(title="Metamorph", lifespan=lifespan)
 
